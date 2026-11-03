@@ -1,7 +1,9 @@
+"""
+    on va modéliser les Accesoir avec asyncio.Queue au lieu d'une liste 
+"""
+
 import sys, time, re
 import asyncio
-
-
 class Logable:
     """
     Classe de base pour disposer d'une méthode log
@@ -26,13 +28,14 @@ class Employe(Logable):
         self.step = 0
         self.log('prêt pour le service')
 
-class Accessoire(list, Logable):
+class Accessoire(asyncio.Queue, Logable):
     """
     Classe de base des accessoires (pic, bar).
-    Un accessoire est une liste : il hérite de append, pop, len...
+    Un accessoire est une file asyncio.Queue (FIFO) : il hérite de put, get, qsize...
+    get() attend qu'un élément soit disponible si la file est vide.
     """
     def __init__(self, name, verbose):
-        list.__init__(self)
+        asyncio.Queue.__init__(self)
         Logable.__init__(self,name, verbose)
         
 
@@ -47,17 +50,14 @@ class Pic(Accessoire):
     déjà présents et libérer le premier embroché.
     """
 
-    def embrocher(self,postit):
-        self.log(f"post-it '{postit}' embrochée, {len(self)} post-it(s) à traiter")
-        self.append(postit)
+    async def embrocher(self,postit):
+        self.log(f"post-it '{postit}' embrochée, {self.qsize()} post-it(s) à traiter")
+        await self.put(postit)
 
-    def liberer(self):
-        if len(self)>0:
-            postit = self.pop()
-            self.log(f"post-it '{postit}' libéré, {len(self)} post-it(s) à traiter")
-            return postit
-        else:
-            return None
+    async def liberer(self):
+        postit = await self.get() #retire et renvoie le premiere élément (si le pic est vide, attend qu'il en arrive un)
+        self.log(f"post-it '{postit}' libéré, {self.qsize()} post-it(s) à traiter")
+        return postit
 
 
 class Bar(Accessoire):
@@ -66,17 +66,15 @@ class Bar(Accessoire):
     en attente d'être servies (évacuées).
     """
 
-    def recevoir(self,commande):
-        self.log(f"'{commande}' posée, {len(self)} commande(s) à servir")
-        self.append(commande)
+    async def recevoir(self,commande):
+        self.log(f"'{commande}' posée, {self.qsize()} commande(s) à servir")
+        await self.put(commande)
 
-    def evacuer(self):
-        if len(self)>0:
-            commande = self.pop()
-            self.log(f"'{commande}' évacuée, {len(self)} commande(s) à servir")
-            return commande
-        else:
-            return None
+    async def evacuer(self):
+        commande = await self.get()
+        self.log(f"'{commande}' évacuée, {self.qsize()} commande(s) à servir")
+        return commande
+
 
 class Serveur(Employe):
 
@@ -89,13 +87,15 @@ class Serveur(Employe):
                 break
             self.log(f"j'ai la commande '{commande}'")
             self.log(f"j'écris sur le post-it '{commande}'")
-            self.pic.embrocher(commande)
+            await self.pic.embrocher(commande)
 
+        await self.pic.embrocher(None)
+        self.log(f"j'ai pris toutes les commandes")
     async def servir(self):
         """ Prend un plateau sur le bar. """
         while True:
-            commande = self.bar.evacuer()
-            if not commande:
+            commande = await self.bar.evacuer()
+            if commande is None:
                 break
             self.log(f"j'apporte la commande '{commande}'")
             for conso in commande:
@@ -111,14 +111,16 @@ class Bariste(Employe):
     async def preparer(self):
         """ Prend un post-it, prépare la commande et la dépose sur le bar. """
         while True:
-            commande = self.pic.liberer()
-            if not commande:
+            commande = await self.pic.liberer()
+            if commande is None :
                 break
             self.log(f"je commence la fabrication de '{commande}'")
             for conso in commande:
                 self.log(f"je prépare '{conso}'")
-            self.bar.recevoir(commande)
+            await self.bar.recevoir(commande)
             self.log(f"la commande {commande} est prête")
+        await self.bar.recevoir(None)
+        self.log(f"j'ai préparé toute les commandes")
 
     async def run(self):
         """Bariste en action """
