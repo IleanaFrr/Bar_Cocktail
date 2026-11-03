@@ -30,7 +30,6 @@ class Employe(Logable):
         self.pic = pic
         self.bar = bar
         self.clients = clients
-        self.step = 0
         self.log('prêt pour le service')
 
 class Accessoire(asyncio.Queue, Logable):
@@ -58,7 +57,7 @@ class Pic(Accessoire):
     async def embrocher(self,postit):
         await self.put(postit)
         self.log(f"post-it '{postit}' embrochée, {self.qsize()} post-it(s) à traiter")
-        
+
     async def liberer(self):
         postit = await self.get()               #retire et renvoie le premiere élément (si le pic est vide, attend qu'il en arrive un)
         self.log(f"post-it '{postit}' libéré, {self.qsize()} post-it(s) à traiter")
@@ -108,6 +107,7 @@ class Serveur(Employe):
             for conso in commande:
                 self.log(f"je sers '{conso}'")
                 await asyncio.sleep(DUREE)    # le temps de servir ce cocktail
+        self.log("j'ai servi toutes les commandes")
 
     async def run(self):
         """ Serveur en action """

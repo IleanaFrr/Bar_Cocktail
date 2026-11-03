@@ -25,7 +25,6 @@ class Employe(Logable):
         self.pic = pic
         self.bar = bar
         self.clients = clients
-        self.step = 0
         self.log('prêt pour le service')
 
 class Accessoire(asyncio.Queue, Logable):
@@ -100,6 +99,7 @@ class Serveur(Employe):
             self.log(f"j'apporte la commande '{commande}'")
             for conso in commande:
                 self.log(f"je sers '{conso}'")
+        self.log("j'ai servi toutes les commandes")
 
     async def run(self):
         """ Serveur en action """
