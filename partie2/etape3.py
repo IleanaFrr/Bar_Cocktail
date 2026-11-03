@@ -56,9 +56,9 @@ class Pic(Accessoire):
     """
 
     async def embrocher(self,postit):
-        self.log(f"post-it '{postit}' embrochée, {self.qsize()} post-it(s) à traiter")
         await self.put(postit)
-
+        self.log(f"post-it '{postit}' embrochée, {self.qsize()} post-it(s) à traiter")
+        
     async def liberer(self):
         postit = await self.get()               #retire et renvoie le premiere élément (si le pic est vide, attend qu'il en arrive un)
         self.log(f"post-it '{postit}' libéré, {self.qsize()} post-it(s) à traiter")
@@ -72,9 +72,9 @@ class Bar(Accessoire):
     """
 
     async def recevoir(self,commande):
-        self.log(f"'{commande}' posée, {self.qsize()} commande(s) à servir")
         await self.put(commande)
-
+        self.log(f"'{commande}' posée, {self.qsize()} commande(s) à servir")
+        
     async def evacuer(self):
         commande = await self.get()
         self.log(f"'{commande}' évacuée, {self.qsize()} commande(s) à servir")
