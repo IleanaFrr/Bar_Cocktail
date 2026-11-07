@@ -93,7 +93,7 @@ class Bariste(Employe):
                     if commande is None:
                         break
                     async with self.verrou:
-                        self.log(f"j'apporte la commande '{commande}'")
+                        self.log(f"j'aide et j'apporte la commande '{commande}'")
                         await asyncio.sleep(self.productivite)
                         for conso in commande:
                             self.log(f"je sers '{conso}'")

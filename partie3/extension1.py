@@ -120,7 +120,6 @@ class Clients:
                     what = found.group(2)
                     commandes.append((start + when, what.split(",")))
         self.commandes = commandes[::-1]
-        # Verrou optionnel pour sécuriser l'accès aux clients si plusieurs serveurs piochent en même temps
         self.lock_clients = asyncio.Lock()
 
     async def commande(self):
@@ -136,7 +135,6 @@ class Clients:
 
 
 async def main():
-    # On lance les deux serveurs (alice et charlie) en plus du bariste (bob)
     await asyncio.gather(alice.run(), charlie.run(), bob.run())
 
 

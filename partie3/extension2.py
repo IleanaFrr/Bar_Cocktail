@@ -59,7 +59,7 @@ class Serveur(Employe):
             async with self.verrou:
                 self.log(f"j'ai la commande '{commande}'")
                 self.log(f"j'écris sur le post-it '{commande}'")
-                await asyncio.sleep(self.productivite) # Utilisation de sa productivité
+                await asyncio.sleep(self.productivite)
                 await self.pic.embrocher(commande)
 
         await self.pic.embrocher(None)
@@ -91,7 +91,7 @@ class Bariste(Employe):
             self.log(f"je commence la fabrication de '{commande}'")
             for conso in commande:
                 self.log(f"je prépare '{conso}'")
-                await asyncio.sleep(self.productivite) # Utilisation de sa productivité
+                await asyncio.sleep(self.productivite)
             await self.bar.recevoir(commande)
             self.log(f"la commande {commande} est prête")
             
