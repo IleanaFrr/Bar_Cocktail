@@ -74,8 +74,8 @@ class Bar(Accessoire):
             await self.recevoir(None)
             
 class Serveur(Employe):
-    def __init__(self, pic, bar, clients, name, verbose):
-        Employe.__init__(self, pic, bar, clients, name, verbose)
+    def __init__(self, pic, bar, clients, name, verbose,productivite):
+        Employe.__init__(self, pic, bar, clients, name, verbose,productivite)
         self.pic.inscrire(self)
         self.bar.inscrire(self)
     async def prendre_commande(self):
@@ -179,8 +179,8 @@ if __name__ == "__main__":
     le_pic = Pic(name="le_pic", verbose=True)
     le_bar = Bar(name="le_bar", verbose=True)
     
-    bob = Bariste(le_pic, le_bar, les_clients, name="bob", verbose=True)
-    alice = Serveur(le_pic, le_bar, les_clients, name="alice", verbose=True)
-    charlie = Serveur(le_pic, le_bar, les_clients, name="charlie", verbose=True)
+    bob = Bariste(le_pic, le_bar, les_clients, name="bob", verbose=True,productivite=0.4)
+    alice = Serveur(le_pic, le_bar, les_clients, name="alice", verbose=True,productivite=0.2)
+    charlie = Serveur(le_pic, le_bar, les_clients, name="charlie", verbose=True,productivite=0.6)
 
     asyncio.run(main())
