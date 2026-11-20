@@ -1,4 +1,4 @@
-# Bar à cocktails – Simulation concurrente en Python (asyncio)
+# Bar à cocktails
 
 Projet réalisé dans le cadre du M2 Data Science par **Ileana Ferry** et **Aïcha Ben Salah**.
 
