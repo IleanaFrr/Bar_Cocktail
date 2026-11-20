@@ -7,15 +7,11 @@ import sys, time, re
 
 
 class Accessoire(list):
-    """
-    Classe de base des accessoires (pic, bar).
-    Un accessoire est une liste : il hérite de append, pop, len...
-    """
+   pass
 
 
 class Pic(Accessoire):
-    """
-    Un pic contient les commandes à fabriquer.
+    """Un pic contient les commandes à fabriquer.
     Il peut embrocher un post-it contenant une commande
     (une liste de consommations) par-dessus les post-it
     déjà présents et libérer le premier embroché.
@@ -50,9 +46,6 @@ class Bar(Accessoire):
 
 
 class Employe:
-    """
-    Classe de base modélisant un employé.
-    """
 
     def __init__(self, pic, bar):
         self.pic = pic
@@ -64,7 +57,6 @@ class Employe:
 class Serveur(Employe):
 
     def prendre_commande(self):
-        """ Prend une commande et embroche un post-it. """
         while True:
             commande = input(f"{self.__class__.__name__}: prêt pour prendre une commande : ")
             if not commande:
@@ -75,7 +67,6 @@ class Serveur(Employe):
             self.pic.embrocher(commande)
 
     def servir(self):
-        """ Prend un plateau sur le bar. """
         while True:
             commande = self.bar.evacuer()
             if not commande:
@@ -97,7 +88,6 @@ class Serveur(Employe):
 class Bariste(Employe):
 
     def preparer(self):
-        """ Prend un post-it, prépare la commande et la dépose sur le bar. """
         while True:
             commande = self.pic.liberer()
             if not commande:

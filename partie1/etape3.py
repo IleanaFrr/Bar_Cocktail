@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys, time, re
 
 
@@ -24,7 +23,7 @@ class Employe(Logable):
         self.bar = bar
         self.clients = clients
         self.step = 0
-        self.log('prêt pour le service')
+        self.log("prêt pour le service")
 
 class Accessoire(list, Logable):
     """
@@ -177,7 +176,7 @@ if __name__=="__main__":
 
     logfile = "borabora.log"
     print(f"login in {logfile}...")
-    logf = open(logfile,"w")
+    logf = open(logfile, "w", encoding="utf-8")
     print("\n---", file=logf, flush=True)
 
     les_clients = Clients(fcommandes)
@@ -186,6 +185,5 @@ if __name__=="__main__":
     bob = Bariste(le_pic, le_bar, les_clients, name="bob", verbose=True)
     alice = Serveur(le_pic, le_bar, les_clients, name="alice", verbose=True)
 
-    
     main()
   

@@ -15,7 +15,7 @@ class Logable:
             print(f"[{self.name}] {msg}", file=logf, flush=True)
 
 class Employe(Logable):
-    def __init__(self, pic, bar, clients, name, verbose, productivite=0.5):
+    def __init__(self, pic, bar, clients, name, verbose, productivite):
         Logable.__init__(self, name, verbose)
         self.pic = pic
         self.bar = bar
