@@ -29,16 +29,33 @@ class Accessoire(asyncio.Queue, Logable):
     def __init__(self, name, verbose):
         asyncio.Queue.__init__(self)
         Logable.__init__(self, name, verbose)
+        self.nb_serveurs = 0          #nombre de serveurs pour cet accesoire 
+
+    def inscrire(self, serveur):
+        """ Un serveur signale qu'il utilise cet accessoire. """
+        self.nb_serveurs += 1
+        self.log(f"{serveur.name} inscrit, {self.nb_serveurs} serveur(s)")
 
 class Pic(Accessoire):
+    def __init__(self, name, verbose):
+        Accessoire.__init__(self, name, verbose)
+        self.nb_fins = 0              # nombre de serveurs ayant envoyé leur None
     async def embrocher(self, postit):
         await self.put(postit)
         self.log(f"post-it '{postit}' embrochée, {self.qsize()} post-it(s) à traiter")
         
     async def liberer(self):
-        postit = await self.get()
-        self.log(f"post-it '{postit}' libéré, {self.qsize()} post-it(s) à traiter")
-        return postit
+        while True:
+            postit = await self.get()   #retire le premier post-it (attend si le pic est vide)
+            if postit is not None:     
+                self.log(f"post-it '{postit}' libéré, {self.qsize()} post-it(s) à traiter")
+                return postit
+            # un serveur a terminé : on le compte, sans prévenir le bariste tout de suite (attendre tous les serveurs avant de retourner None qui signale la fin)
+            self.nb_fins += 1
+            self.log(f"fin d'un serveur ({self.nb_fins}/{self.nb_serveurs})")
+            if self.nb_fins == self.nb_serveurs:
+                return None             # tous les serveurs ont terminé : fin du service
+            # sinon, on continue : d'autres commandes peuvent encore arriver
 
 class Bar(Accessoire):
     async def recevoir(self, commande):
@@ -49,8 +66,17 @@ class Bar(Accessoire):
         commande = await self.get()
         self.log(f"'{commande}' évacuée, {self.qsize()} commande(s) à servir")
         return commande
-
+        
+    async def fermer(self):
+        """ Fin du service : un None par serveur inscrit, pour arrêter chaque tâche servir(). """
+        for i in range(self.nb_serveurs):
+            await self.recevoir(None)
+            
 class Serveur(Employe):
+    def __init__(self, pic, bar, clients, name, verbose):
+        Employe.__init__(self, pic, bar, clients, name, verbose)
+        self.pic.inscrire(self)
+        self.bar.inscrire(self)
     async def prendre_commande(self):
         while True:
             self.log("prêt pour prendre une nouvelle commande...'")
@@ -95,8 +121,8 @@ class Bariste(Employe):
                 await asyncio.sleep(DUREE)
             await self.bar.recevoir(commande)
             self.log(f"la commande {commande} est prête")
-        await self.bar.recevoir(None)
-        await self.bar.recevoir(None) 
+            
+        await self.bar.fermer()      
         self.log("j'ai préparé toute les commandes")
 
     async def run(self):
